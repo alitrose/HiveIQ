@@ -248,14 +248,14 @@ HiveIQ is structured around a decoupled two-tier architecture:
 ```
 
 ### 3.3 Product Working Flow
-1. **User Input / Preset Selection:** The user selects a country from the catalog or inputs 3 years of prior production volume ($t-1, t-2, t-3$).
-2. **Feature Computation:** The system computes the 3-year historical mean and 1-year momentum difference.
-3. **Standardization:** Input features are transformed using training mean $\mu$ and standard deviation $\sigma$.
-4. **Parallel Model Inference:**
-   - Linear Regression evaluates continuous production in tonnes.
-   - Logistic Regression computes growth probability via the sigmoid function.
-   - KNN computes Euclidean distance against 156 country vectors to extract the 5 closest peers.
-5. **Persistence & Evaluation:** The user saves the prediction record, subsequently enters ground truth actual yields, and monitors prediction errors over time.
+1. User Input / Preset Selection: The user selects a country from the catalog or enters three prior years of honey production: Year t-1, Year t-2, and Year t-3.
+2. Feature Computation: The system automatically computes the 3-year historical moving average and the 1-year momentum trend difference (Year t-1 minus Year t-2).
+3. Standardization: Input features are standardized using the training mean (μ) and standard deviation (σ) vectors fitted during training.
+4. Parallel Model Inference:
+   - Linear Regression evaluates continuous honey production in metric tonnes: Y = max(0, Intercept + sum(Weights * Scaled_Features)).
+   - Logistic Regression computes production growth probability via the sigmoid activation function: P(Growth) = 1 / (1 + exp(-z)).
+   - K-Nearest Neighbors scans all 156 sovereign country reference vectors to locate the 5 closest producing nations based on Euclidean distance.
+5. Persistence & Ground Truth Validation: The user saves the prediction record to browser localStorage, subsequently records actual observed yield, and tracks the real-time prediction variance and error over time.
 
 ---
 
