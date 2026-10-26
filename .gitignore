@@ -1,0 +1,6 @@
+# HiveIQ gitignore
+.DS_Store
+Thumbs.db
+*.pyc
+__pycache__/
+.ipynb_checkpoints/

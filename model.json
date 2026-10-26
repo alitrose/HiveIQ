@@ -1,0 +1,4587 @@
+{
+  "metadata": {
+    "project_name": "HiveIQ",
+    "system_title": "Smart Honey Hive Tracking & Production Analytics",
+    "course": "Data Science Ecosystem (23CS2024)",
+    "model_version": "1.0.0",
+    "dataset_source": "FAOSTAT (Food and Agriculture Organization of the United Nations)",
+    "dataset_records": 9601,
+    "verified_country_records": 8129,
+    "cleaned_modeling_samples": 7658,
+    "train_samples": 6263,
+    "test_samples": 1395,
+    "train_years": "1964-2014",
+    "test_years": "2015-2024",
+    "export_timestamp": "2026-10-26T21:25:00Z",
+    "safety_disclaimer": "HiveIQ is an exploratory screening and trend-estimation system developed for academic demonstration. Predictions represent statistical baseline estimates and must not replace professional on-site apiary inspections or official agricultural census audits."
+  },
+  "feature_pipeline": {
+    "feature_names": [
+      "prod_lag1",
+      "prod_lag2",
+      "prod_lag3",
+      "prod_roll_mean3",
+      "prod_diff_1"
+    ],
+    "display_labels": [
+      "Honey Production 1 Year Ago (t-1, Tonnes)",
+      "Honey Production 2 Years Ago (t-2, Tonnes)",
+      "Honey Production 3 Years Ago (t-3, Tonnes)",
+      "3-Year Historical Rolling Mean (Tonnes)",
+      "1-Year Trend Difference (t-1 minus t-2, Tonnes)"
+    ],
+    "scaler_mean": [
+      13242.8993,
+      12945.5806,
+      12659.7849,
+      12949.4216,
+      297.3187
+    ],
+    "scaler_scale": [
+      35830.602,
+      34791.5249,
+      33743.6024,
+      34719.1627,
+      3644.9156
+    ],
+    "helper_formula": "x_scaled = (x - mean) / scale"
+  },
+  "models": {
+    "linear_regression": {
+      "algorithm": "Linear Regression (Ordinary Least Squares)",
+      "task": "Continuous Honey Production Forecast (Tonnes)",
+      "selected_as_best_regression": true,
+      "intercept": 13555.2104,
+      "coefficients": [
+        13273.9728,
+        13542.874,
+        392.8108,
+        9217.2588,
+        1217.3661
+      ],
+      "evaluation_metrics": {
+        "mae_tonnes": 2350.33,
+        "rmse_tonnes": 9296.05,
+        "r2_score": 0.9801
+      },
+      "formula_description": "Production_t = intercept + sum(coef[i] * scaled_feature[i])"
+    },
+    "knn_regressor": {
+      "algorithm": "K-Nearest Neighbors Regressor",
+      "task": "Continuous Honey Production Forecast (Tonnes)",
+      "k_neighbors": 5,
+      "distance_metric": "Euclidean distance on standardized 5-feature space",
+      "evaluation_metrics": {
+        "mae_tonnes": 2896.79,
+        "rmse_tonnes": 12460.96,
+        "r2_score": 0.9643
+      }
+    },
+    "logistic_regression": {
+      "algorithm": "Logistic Regression (L2 Regularized)",
+      "task": "Honey Production Growth vs. Decline/Stable Classification",
+      "selected_as_best_classification": true,
+      "intercept": 0.2005,
+      "coefficients": [
+        -0.0438,
+        -0.0307,
+        0.2002,
+        0.0396,
+        -0.1374
+      ],
+      "decision_threshold": 0.5,
+      "classes": {
+        "0": {
+          "label": "Decline / Stable Production",
+          "badge_class": "badge-decline",
+          "trend_indicator": "Negative or Flat"
+        },
+        "1": {
+          "label": "Production Growth Expected",
+          "badge_class": "badge-growth",
+          "trend_indicator": "Positive Growth"
+        }
+      },
+      "evaluation_metrics": {
+        "accuracy": 0.6122,
+        "precision": 0.6077,
+        "recall": 0.9892,
+        "f1_score": 0.7529
+      },
+      "formula_description": "p = 1 / (1 + exp(-(intercept + sum(coef[i] * scaled_feature[i]))))"
+    },
+    "knn_classifier": {
+      "algorithm": "K-Nearest Neighbors Classifier",
+      "task": "Production Growth Classification",
+      "k_neighbors": 5,
+      "evaluation_metrics": {
+        "accuracy": 0.5699,
+        "precision": 0.6375,
+        "recall": 0.6483,
+        "f1_score": 0.6429
+      }
+    },
+    "kmeans_clustering": {
+      "algorithm": "K-Means Clustering",
+      "task": "Country Honey Production Profile Segmentation",
+      "k_clusters": 3,
+      "silhouette_score": 0.8651,
+      "cluster_features": [
+        "mean_prod",
+        "max_prod",
+        "std_prod",
+        "recent_prod"
+      ],
+      "scaler_mean": [
+        14090.3229,
+        29167.0397,
+        6307.3599,
+        23509.8628
+      ],
+      "scaler_scale": [
+        36268.6975,
+        77767.1422,
+        19322.8399,
+        63767.8995
+      ],
+      "cluster_centers_scaled": [
+        [
+          -0.2287,
+          -0.2379,
+          -0.2093,
+          -0.2327
+        ],
+        [
+          2.0189,
+          2.0632,
+          1.4875,
+          2.0121
+        ],
+        [
+          6.3719,
+          6.8123,
+          7.6313,
+          6.6946
+        ]
+      ],
+      "tiers": {
+        "0": {
+          "tier_code": "TIER_3",
+          "tier_name": "Tier 3: Small / Artisanal Producers",
+          "badge_class": "badge-tier3",
+          "description": "Countries with modest or developing honey yields (<15,000 tonnes/year), often serving local subsistence or specialty beekeeping.",
+          "actionable_advice": "Prioritize localized hive health monitoring, basic disease prevention, and collective cooperative harvesting."
+        },
+        "1": {
+          "tier_code": "TIER_2",
+          "tier_name": "Tier 2: Commercial / Regional Major Producers",
+          "badge_class": "badge-tier2",
+          "description": "Countries with well-established commercial apiary sectors (20,000 to 100,000 tonnes/year) catering to domestic and export demands.",
+          "actionable_advice": "Maintain proactive swarm control, floral corridor tracking, and seasonal weather risk mitigation."
+        },
+        "2": {
+          "tier_code": "TIER_1",
+          "tier_name": "Tier 1: Global Mega-Producers",
+          "badge_class": "badge-tier1",
+          "description": "Global industrial market leaders (>300,000 tonnes/year) with high hive density and mechanized processing facilities.",
+          "actionable_advice": "Focus on national biodiversity preservation, pesticide buffer zones, and macro export quality verification."
+        }
+      }
+    }
+  },
+  "country_catalog": [
+    {
+      "area": "Afghanistan",
+      "mean_prod": 2945.5,
+      "max_prod": 4698.2,
+      "std_prod": 813.9,
+      "recent_prod": 1467.1,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Albania",
+      "mean_prod": 1572.5,
+      "max_prod": 5940.2,
+      "std_prod": 1585.1,
+      "recent_prod": 5940.2,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Algeria",
+      "mean_prod": 2934.5,
+      "max_prod": 7356.0,
+      "std_prod": 2085.0,
+      "recent_prod": 5876.1,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Angola",
+      "mean_prod": 20261.4,
+      "max_prod": 24000.0,
+      "std_prod": 3301.5,
+      "recent_prod": 23423.7,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Argentina",
+      "mean_prod": 54744.0,
+      "max_prod": 110000.0,
+      "std_prod": 24542.2,
+      "recent_prod": 69297.6,
+      "cluster_id": 1,
+      "tier_name": "Tier 2: Commercial / Regional Major Producers"
+    },
+    {
+      "area": "Armenia",
+      "mean_prod": 1669.3,
+      "max_prod": 2200.0,
+      "std_prod": 518.9,
+      "recent_prod": 2000.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Australia",
+      "mean_prod": 18535.5,
+      "max_prod": 28038.0,
+      "std_prod": 4655.5,
+      "recent_prod": 10980.9,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Austria",
+      "mean_prod": 5408.9,
+      "max_prod": 10500.0,
+      "std_prod": 1979.8,
+      "recent_prod": 5500.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Azerbaijan",
+      "mean_prod": 2365.7,
+      "max_prod": 7445.9,
+      "std_prod": 2183.7,
+      "recent_prod": 4819.2,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Belarus",
+      "mean_prod": 2821.2,
+      "max_prod": 4113.0,
+      "std_prod": 525.2,
+      "recent_prod": 2256.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Belgium-Luxembourg",
+      "mean_prod": 1096.1,
+      "max_prod": 1761.0,
+      "std_prod": 157.9,
+      "recent_prod": 1400.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Belize",
+      "mean_prod": 113.7,
+      "max_prod": 308.0,
+      "std_prod": 87.2,
+      "recent_prod": 57.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Bhutan",
+      "mean_prod": 48.1,
+      "max_prod": 65.9,
+      "std_prod": 11.5,
+      "recent_prod": 39.2,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Bolivia (Plurinational State of)",
+      "mean_prod": 709.2,
+      "max_prod": 1175.0,
+      "std_prod": 217.8,
+      "recent_prod": 733.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Bosnia and Herzegovina",
+      "mean_prod": 2495.3,
+      "max_prod": 4926.0,
+      "std_prod": 1284.7,
+      "recent_prod": 3393.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Brazil",
+      "mean_prod": 23058.9,
+      "max_prod": 67314.0,
+      "std_prod": 16979.0,
+      "recent_prod": 67314.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Bulgaria",
+      "mean_prod": 7791.8,
+      "max_prod": 11807.0,
+      "std_prod": 2632.6,
+      "recent_prod": 11518.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Burkina Faso",
+      "mean_prod": 420.1,
+      "max_prod": 561.7,
+      "std_prod": 123.5,
+      "recent_prod": 391.3,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Burundi",
+      "mean_prod": 354.4,
+      "max_prod": 1000.0,
+      "std_prod": 210.4,
+      "recent_prod": 929.4,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Cameroon",
+      "mean_prod": 3078.6,
+      "max_prod": 4842.5,
+      "std_prod": 992.2,
+      "recent_prod": 4842.5,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Canada",
+      "mean_prod": 32726.4,
+      "max_prod": 48450.0,
+      "std_prod": 7484.2,
+      "recent_prod": 35460.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Central African Republic",
+      "mean_prod": 10375.0,
+      "max_prod": 16950.5,
+      "std_prod": 4571.5,
+      "recent_prod": 16950.5,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Central Asia",
+      "mean_prod": 16547.9,
+      "max_prod": 30451.6,
+      "std_prod": 6998.0,
+      "recent_prod": 30451.6,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Chad",
+      "mean_prod": 957.1,
+      "max_prod": 1055.6,
+      "std_prod": 43.5,
+      "recent_prod": 1012.4,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Chile",
+      "mean_prod": 8109.3,
+      "max_prod": 13000.0,
+      "std_prod": 2852.0,
+      "recent_prod": 12224.8,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "China",
+      "mean_prod": 247551.2,
+      "max_prod": 562875.0,
+      "std_prod": 155483.6,
+      "recent_prod": 456024.3,
+      "cluster_id": 2,
+      "tier_name": "Tier 1: Global Mega-Producers"
+    },
+    {
+      "area": "China, Taiwan Province of",
+      "mean_prod": 4718.8,
+      "max_prod": 15089.0,
+      "std_prod": 4014.9,
+      "recent_prod": 11224.3,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "China, mainland",
+      "mean_prod": 242832.5,
+      "max_prod": 555000.0,
+      "std_prod": 152046.8,
+      "recent_prod": 444800.0,
+      "cluster_id": 2,
+      "tier_name": "Tier 1: Global Mega-Producers"
+    },
+    {
+      "area": "Colombia",
+      "mean_prod": 2507.7,
+      "max_prod": 7000.0,
+      "std_prod": 1203.2,
+      "recent_prod": 6327.6,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Cook Islands",
+      "mean_prod": 0.6,
+      "max_prod": 1.0,
+      "std_prod": 0.3,
+      "recent_prod": 1.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Costa Rica",
+      "mean_prod": 976.2,
+      "max_prod": 1500.0,
+      "std_prod": 342.1,
+      "recent_prod": 952.7,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Croatia",
+      "mean_prod": 4233.3,
+      "max_prod": 11477.0,
+      "std_prod": 3053.7,
+      "recent_prod": 8405.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Cuba",
+      "mean_prod": 6736.6,
+      "max_prod": 10500.0,
+      "std_prod": 1876.3,
+      "recent_prod": 7369.1,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Cyprus",
+      "mean_prod": 468.5,
+      "max_prod": 1002.0,
+      "std_prod": 202.3,
+      "recent_prod": 660.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Czechia",
+      "mean_prod": 7490.8,
+      "max_prod": 11302.0,
+      "std_prod": 1561.7,
+      "recent_prod": 7418.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Czechoslovakia",
+      "mean_prod": 8168.9,
+      "max_prod": 15834.0,
+      "std_prod": 3170.7,
+      "recent_prod": 9275.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "C\u00f4te d'Ivoire",
+      "mean_prod": 571.6,
+      "max_prod": 631.0,
+      "std_prod": 84.3,
+      "recent_prod": 619.3,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Denmark",
+      "mean_prod": 1500.0,
+      "max_prod": 1500.0,
+      "std_prod": 0.0,
+      "recent_prod": 1500.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Dominican Republic",
+      "mean_prod": 1169.9,
+      "max_prod": 3228.0,
+      "std_prod": 431.9,
+      "recent_prod": 867.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Eastern Africa",
+      "mean_prod": 80425.4,
+      "max_prod": 219090.7,
+      "std_prod": 41680.7,
+      "recent_prod": 171042.4,
+      "cluster_id": 1,
+      "tier_name": "Tier 2: Commercial / Regional Major Producers"
+    },
+    {
+      "area": "Ecuador",
+      "mean_prod": 773.8,
+      "max_prod": 1000.0,
+      "std_prod": 175.2,
+      "recent_prod": 894.9,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Egypt",
+      "mean_prod": 7270.0,
+      "max_prod": 12384.0,
+      "std_prod": 2333.2,
+      "recent_prod": 3782.1,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "El Salvador",
+      "mean_prod": 2278.6,
+      "max_prod": 3800.0,
+      "std_prod": 860.5,
+      "recent_prod": 1840.8,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Estonia",
+      "mean_prod": 836.3,
+      "max_prod": 1631.0,
+      "std_prod": 412.5,
+      "recent_prod": 1313.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Ethiopia",
+      "mean_prod": 54195.6,
+      "max_prod": 150258.0,
+      "std_prod": 29047.3,
+      "recent_prod": 85959.9,
+      "cluster_id": 1,
+      "tier_name": "Tier 2: Commercial / Regional Major Producers"
+    },
+    {
+      "area": "Ethiopia PDR",
+      "mean_prod": 19602.8,
+      "max_prod": 23700.0,
+      "std_prod": 2627.0,
+      "recent_prod": 23700.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Fiji",
+      "mean_prod": 123.7,
+      "max_prod": 595.0,
+      "std_prod": 149.4,
+      "recent_prod": 375.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Finland",
+      "mean_prod": 1435.5,
+      "max_prod": 3300.0,
+      "std_prod": 773.1,
+      "recent_prod": 2300.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "France",
+      "mean_prod": 14670.9,
+      "max_prod": 24021.0,
+      "std_prod": 3873.9,
+      "recent_prod": 20034.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "French Polynesia",
+      "mean_prod": 48.5,
+      "max_prod": 127.2,
+      "std_prod": 43.0,
+      "recent_prod": 121.8,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Georgia",
+      "mean_prod": 2144.5,
+      "max_prod": 4200.0,
+      "std_prod": 832.0,
+      "recent_prod": 1900.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Germany",
+      "mean_prod": 21904.3,
+      "max_prod": 38953.0,
+      "std_prod": 5746.3,
+      "recent_prod": 31800.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Greece",
+      "mean_prod": 13838.3,
+      "max_prod": 27633.0,
+      "std_prod": 4959.9,
+      "recent_prod": 24841.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Guadeloupe",
+      "mean_prod": 8.1,
+      "max_prod": 15.0,
+      "std_prod": 3.0,
+      "recent_prod": 4.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Guatemala",
+      "mean_prod": 3306.2,
+      "max_prod": 5770.0,
+      "std_prod": 1052.7,
+      "recent_prod": 2203.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Guinea",
+      "mean_prod": 753.4,
+      "max_prod": 1073.3,
+      "std_prod": 228.2,
+      "recent_prod": 1065.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Guinea-Bissau",
+      "mean_prod": 95.4,
+      "max_prod": 172.9,
+      "std_prod": 40.3,
+      "recent_prod": 172.9,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Guyana",
+      "mean_prod": 67.9,
+      "max_prod": 90.3,
+      "std_prod": 18.2,
+      "recent_prod": 90.3,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Haiti",
+      "mean_prod": 446.2,
+      "max_prod": 850.0,
+      "std_prod": 192.4,
+      "recent_prod": 298.2,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Honduras",
+      "mean_prod": 436.0,
+      "max_prod": 1586.0,
+      "std_prod": 416.6,
+      "recent_prod": 90.9,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Hungary",
+      "mean_prod": 15299.7,
+      "max_prod": 32000.0,
+      "std_prod": 6148.7,
+      "recent_prod": 14000.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "India",
+      "mean_prod": 52163.3,
+      "max_prod": 146000.0,
+      "std_prod": 18592.7,
+      "recent_prod": 146000.0,
+      "cluster_id": 1,
+      "tier_name": "Tier 2: Commercial / Regional Major Producers"
+    },
+    {
+      "area": "Iran (Islamic Republic of)",
+      "mean_prod": 28320.5,
+      "max_prod": 80249.2,
+      "std_prod": 27280.8,
+      "recent_prod": 80249.2,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Iraq",
+      "mean_prod": 66.6,
+      "max_prod": 115.7,
+      "std_prod": 29.5,
+      "recent_prod": 110.1,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Ireland",
+      "mean_prod": 205.6,
+      "max_prod": 333.0,
+      "std_prod": 51.0,
+      "recent_prod": 267.7,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Israel",
+      "mean_prod": 2588.7,
+      "max_prod": 4500.0,
+      "std_prod": 769.8,
+      "recent_prod": 3800.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Italy",
+      "mean_prod": 9780.3,
+      "max_prod": 25155.0,
+      "std_prod": 4489.6,
+      "recent_prod": 21857.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Jamaica",
+      "mean_prod": 888.5,
+      "max_prod": 1200.0,
+      "std_prod": 158.7,
+      "recent_prod": 766.1,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Japan",
+      "mean_prod": 4692.8,
+      "max_prod": 8517.0,
+      "std_prod": 2005.4,
+      "recent_prod": 2637.1,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Jordan",
+      "mean_prod": 148.4,
+      "max_prod": 418.0,
+      "std_prod": 93.6,
+      "recent_prod": 418.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Kazakhstan",
+      "mean_prod": 2168.9,
+      "max_prod": 7575.0,
+      "std_prod": 1563.5,
+      "recent_prod": 4990.6,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Kenya",
+      "mean_prod": 15753.7,
+      "max_prod": 34759.0,
+      "std_prod": 7506.4,
+      "recent_prod": 19462.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Kyrgyzstan",
+      "mean_prod": 1747.0,
+      "max_prod": 3014.0,
+      "std_prod": 518.9,
+      "recent_prod": 3014.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Land Locked Developing Countries (LLDCs)",
+      "mean_prod": 63048.0,
+      "max_prod": 234984.3,
+      "std_prod": 57962.2,
+      "recent_prod": 189326.8,
+      "cluster_id": 1,
+      "tier_name": "Tier 2: Commercial / Regional Major Producers"
+    },
+    {
+      "area": "Latvia",
+      "mean_prod": 1219.7,
+      "max_prod": 2319.0,
+      "std_prod": 671.3,
+      "recent_prod": 2193.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Least Developed Countries (LDCs)",
+      "mean_prod": 108271.3,
+      "max_prod": 268458.4,
+      "std_prod": 50499.3,
+      "recent_prod": 218276.3,
+      "cluster_id": 1,
+      "tier_name": "Tier 2: Commercial / Regional Major Producers"
+    },
+    {
+      "area": "Lebanon",
+      "mean_prod": 961.1,
+      "max_prod": 2130.0,
+      "std_prod": 590.4,
+      "recent_prod": 1231.4,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Libya",
+      "mean_prod": 591.2,
+      "max_prod": 1250.0,
+      "std_prod": 318.1,
+      "recent_prod": 786.6,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Lithuania",
+      "mean_prod": 2537.5,
+      "max_prod": 7894.0,
+      "std_prod": 1991.9,
+      "recent_prod": 5884.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Low Income Food Deficit Countries (LIFDCs)",
+      "mean_prod": 112803.1,
+      "max_prod": 279822.1,
+      "std_prod": 58660.2,
+      "recent_prod": 241832.2,
+      "cluster_id": 1,
+      "tier_name": "Tier 2: Commercial / Regional Major Producers"
+    },
+    {
+      "area": "Luxembourg",
+      "mean_prod": 132.7,
+      "max_prod": 270.3,
+      "std_prod": 52.4,
+      "recent_prod": 53.1,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Madagascar",
+      "mean_prod": 5226.1,
+      "max_prod": 11400.0,
+      "std_prod": 2633.9,
+      "recent_prod": 3995.3,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Mali",
+      "mean_prod": 1797.1,
+      "max_prod": 12647.0,
+      "std_prod": 3648.8,
+      "recent_prod": 1729.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Mexico",
+      "mean_prod": 54689.2,
+      "max_prod": 74613.0,
+      "std_prod": 10272.0,
+      "recent_prod": 57430.4,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Middle Africa",
+      "mean_prod": 34672.0,
+      "max_prod": 46228.9,
+      "std_prod": 8589.7,
+      "recent_prod": 46228.9,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Mongolia",
+      "mean_prod": 53.7,
+      "max_prod": 478.6,
+      "std_prod": 88.1,
+      "recent_prod": 283.3,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Montenegro",
+      "mean_prod": 556.7,
+      "max_prod": 1175.0,
+      "std_prod": 269.4,
+      "recent_prod": 622.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Morocco",
+      "mean_prod": 3534.8,
+      "max_prod": 8000.0,
+      "std_prod": 1913.5,
+      "recent_prod": 8000.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Mozambique",
+      "mean_prod": 384.2,
+      "max_prod": 631.4,
+      "std_prod": 125.8,
+      "recent_prod": 599.7,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Myanmar",
+      "mean_prod": 1619.6,
+      "max_prod": 5640.8,
+      "std_prod": 1977.6,
+      "recent_prod": 5640.8,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Nepal",
+      "mean_prod": 2714.7,
+      "max_prod": 5168.0,
+      "std_prod": 1511.7,
+      "recent_prod": 4332.1,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Netherlands (Kingdom of the)",
+      "mean_prod": 410.8,
+      "max_prod": 1000.0,
+      "std_prod": 185.5,
+      "recent_prod": 500.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "New Caledonia",
+      "mean_prod": 66.3,
+      "max_prod": 240.0,
+      "std_prod": 70.4,
+      "recent_prod": 229.4,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "New Zealand",
+      "mean_prod": 10091.3,
+      "max_prod": 27000.0,
+      "std_prod": 5340.5,
+      "recent_prod": 17500.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Nicaragua",
+      "mean_prod": 351.7,
+      "max_prod": 1690.0,
+      "std_prod": 366.1,
+      "recent_prod": 1690.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Niue",
+      "mean_prod": 17.2,
+      "max_prod": 80.0,
+      "std_prod": 16.8,
+      "recent_prod": 7.2,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "North Macedonia",
+      "mean_prod": 1327.3,
+      "max_prod": 3651.0,
+      "std_prod": 900.4,
+      "recent_prod": 3651.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Northern Africa",
+      "mean_prod": 16413.7,
+      "max_prod": 25396.1,
+      "std_prod": 4634.7,
+      "recent_prod": 22864.9,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Norway",
+      "mean_prod": 1224.0,
+      "max_prod": 2128.0,
+      "std_prod": 381.2,
+      "recent_prod": 1510.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Oman",
+      "mean_prod": 436.2,
+      "max_prod": 947.8,
+      "std_prod": 255.1,
+      "recent_prod": 765.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Pakistan",
+      "mean_prod": 2008.8,
+      "max_prod": 5277.2,
+      "std_prod": 1664.7,
+      "recent_prod": 5277.2,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Palestine",
+      "mean_prod": 415.7,
+      "max_prod": 619.0,
+      "std_prod": 119.6,
+      "recent_prod": 500.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Panama",
+      "mean_prod": 285.1,
+      "max_prod": 535.0,
+      "std_prod": 117.0,
+      "recent_prod": 248.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Papua New Guinea",
+      "mean_prod": 116.4,
+      "max_prod": 160.0,
+      "std_prod": 37.9,
+      "recent_prod": 155.6,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Paraguay",
+      "mean_prod": 1312.6,
+      "max_prod": 1898.8,
+      "std_prod": 490.0,
+      "recent_prod": 1898.8,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Peru",
+      "mean_prod": 1482.1,
+      "max_prod": 1682.7,
+      "std_prod": 302.6,
+      "recent_prod": 1672.3,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Poland",
+      "mean_prod": 12644.7,
+      "max_prod": 25997.0,
+      "std_prod": 4446.4,
+      "recent_prod": 24000.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Portugal",
+      "mean_prod": 5297.8,
+      "max_prod": 14246.0,
+      "std_prod": 3107.4,
+      "recent_prod": 8915.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Puerto Rico",
+      "mean_prod": 93.2,
+      "max_prod": 402.7,
+      "std_prod": 79.1,
+      "recent_prod": 142.5,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Republic of Korea",
+      "mean_prod": 13156.3,
+      "max_prod": 32327.7,
+      "std_prod": 10792.8,
+      "recent_prod": 31216.5,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Republic of Moldova",
+      "mean_prod": 3170.2,
+      "max_prod": 5038.0,
+      "std_prod": 882.7,
+      "recent_prod": 4485.4,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Romania",
+      "mean_prod": 15831.2,
+      "max_prod": 31541.0,
+      "std_prod": 6951.9,
+      "recent_prod": 31541.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Russian Federation",
+      "mean_prod": 58779.3,
+      "max_prod": 74868.0,
+      "std_prod": 7806.7,
+      "recent_prod": 65455.1,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Rwanda",
+      "mean_prod": 1599.0,
+      "max_prod": 5676.9,
+      "std_prod": 2147.0,
+      "recent_prod": 5676.9,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "R\u00e9union",
+      "mean_prod": 44.8,
+      "max_prod": 100.0,
+      "std_prod": 28.7,
+      "recent_prod": 89.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Samoa",
+      "mean_prod": 298.6,
+      "max_prod": 600.0,
+      "std_prod": 110.3,
+      "recent_prod": 180.2,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Saudi Arabia",
+      "mean_prod": 700.4,
+      "max_prod": 5833.0,
+      "std_prod": 1667.2,
+      "recent_prod": 5779.1,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Senegal",
+      "mean_prod": 1178.3,
+      "max_prod": 3927.7,
+      "std_prod": 1483.6,
+      "recent_prod": 3673.2,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Serbia",
+      "mean_prod": 8239.9,
+      "max_prod": 14664.0,
+      "std_prod": 3498.1,
+      "recent_prod": 14664.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Serbia and Montenegro",
+      "mean_prod": 2925.1,
+      "max_prod": 4275.0,
+      "std_prod": 732.3,
+      "recent_prod": 4275.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Sierra Leone",
+      "mean_prod": 726.9,
+      "max_prod": 2240.3,
+      "std_prod": 266.7,
+      "recent_prod": 2240.3,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Slovakia",
+      "mean_prod": 3699.4,
+      "max_prod": 4628.0,
+      "std_prod": 640.0,
+      "recent_prod": 4212.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Slovenia",
+      "mean_prod": 1685.3,
+      "max_prod": 2550.0,
+      "std_prod": 576.8,
+      "recent_prod": 1094.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Small Island Developing States (SIDS)",
+      "mean_prod": 10940.3,
+      "max_prod": 14934.1,
+      "std_prod": 2193.5,
+      "recent_prod": 11585.8,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "South Africa",
+      "mean_prod": 862.9,
+      "max_prod": 1140.0,
+      "std_prod": 319.9,
+      "recent_prod": 1084.1,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Southern Africa",
+      "mean_prod": 862.9,
+      "max_prod": 1140.0,
+      "std_prod": 319.9,
+      "recent_prod": 1084.1,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Spain",
+      "mean_prod": 22607.8,
+      "max_prod": 36394.0,
+      "std_prod": 9820.5,
+      "recent_prod": 33181.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Sudan",
+      "mean_prod": 744.4,
+      "max_prod": 750.0,
+      "std_prod": 2.5,
+      "recent_prod": 745.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Sudan (former)",
+      "mean_prod": 634.0,
+      "max_prod": 735.0,
+      "std_prod": 72.0,
+      "recent_prod": 735.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Suriname",
+      "mean_prod": 58.4,
+      "max_prod": 86.0,
+      "std_prod": 19.2,
+      "recent_prod": 41.3,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Sweden",
+      "mean_prod": 2934.9,
+      "max_prod": 5173.0,
+      "std_prod": 732.5,
+      "recent_prod": 3400.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Switzerland",
+      "mean_prod": 3067.8,
+      "max_prod": 7496.0,
+      "std_prod": 1424.4,
+      "recent_prod": 3268.9,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Syrian Arab Republic",
+      "mean_prod": 1416.0,
+      "max_prod": 3846.0,
+      "std_prod": 1102.9,
+      "recent_prod": 3518.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Tajikistan",
+      "mean_prod": 2333.7,
+      "max_prod": 4882.8,
+      "std_prod": 1828.0,
+      "recent_prod": 4882.8,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Thailand",
+      "mean_prod": 5469.0,
+      "max_prod": 11680.9,
+      "std_prod": 3851.0,
+      "recent_prod": 11680.9,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Timor-Leste",
+      "mean_prod": 498.3,
+      "max_prod": 792.0,
+      "std_prod": 92.1,
+      "recent_prod": 590.1,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Tonga",
+      "mean_prod": 13.2,
+      "max_prod": 20.0,
+      "std_prod": 3.0,
+      "recent_prod": 10.7,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Trinidad and Tobago",
+      "mean_prod": 97.0,
+      "max_prod": 200.0,
+      "std_prod": 52.6,
+      "recent_prod": 104.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Tunisia",
+      "mean_prod": 1849.2,
+      "max_prod": 4700.0,
+      "std_prod": 1381.8,
+      "recent_prod": 3675.1,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Turkmenistan",
+      "mean_prod": 3363.6,
+      "max_prod": 9900.0,
+      "std_prod": 3717.9,
+      "recent_prod": 932.6,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Tuvalu",
+      "mean_prod": 2.6,
+      "max_prod": 4.9,
+      "std_prod": 1.3,
+      "recent_prod": 4.9,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "T\u00fcrkiye",
+      "mean_prod": 57465.8,
+      "max_prod": 118297.0,
+      "std_prod": 33743.4,
+      "recent_prod": 95492.3,
+      "cluster_id": 1,
+      "tier_name": "Tier 2: Commercial / Regional Major Producers"
+    },
+    {
+      "area": "USSR",
+      "mean_prod": 203609.6,
+      "max_prod": 240000.0,
+      "std_prod": 19115.0,
+      "recent_prod": 240000.0,
+      "cluster_id": 1,
+      "tier_name": "Tier 2: Commercial / Regional Major Producers"
+    },
+    {
+      "area": "Uganda",
+      "mean_prod": 2724.7,
+      "max_prod": 21635.2,
+      "std_prod": 6504.6,
+      "recent_prod": 21635.2,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Ukraine",
+      "mean_prod": 64071.4,
+      "max_prod": 75600.0,
+      "std_prod": 7485.8,
+      "recent_prod": 53490.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "United Kingdom of Great Britain and Northern Ireland",
+      "mean_prod": 4907.7,
+      "max_prod": 10089.0,
+      "std_prod": 2703.3,
+      "recent_prod": 10089.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "United Republic of Tanzania",
+      "mean_prod": 19593.0,
+      "max_prod": 32164.1,
+      "std_prod": 9664.3,
+      "recent_prod": 31902.5,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "United States of America",
+      "mean_prod": 86394.3,
+      "max_prod": 129230.0,
+      "std_prod": 16658.5,
+      "recent_prod": 60960.0,
+      "cluster_id": 1,
+      "tier_name": "Tier 2: Commercial / Regional Major Producers"
+    },
+    {
+      "area": "Uruguay",
+      "mean_prod": 6558.3,
+      "max_prod": 15500.0,
+      "std_prod": 4570.2,
+      "recent_prod": 11608.4,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Uzbekistan",
+      "mean_prod": 6934.8,
+      "max_prod": 16631.6,
+      "std_prod": 5028.9,
+      "recent_prod": 16631.6,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Venezuela (Bolivarian Republic of)",
+      "mean_prod": 501.4,
+      "max_prod": 1008.0,
+      "std_prod": 219.8,
+      "recent_prod": 594.5,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Viet Nam",
+      "mean_prod": 6937.9,
+      "max_prod": 25462.7,
+      "std_prod": 8078.9,
+      "recent_prod": 25462.7,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Western Africa",
+      "mean_prod": 4514.4,
+      "max_prod": 16781.1,
+      "std_prod": 4375.4,
+      "recent_prod": 9891.1,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Yemen",
+      "mean_prod": 1297.9,
+      "max_prod": 2959.3,
+      "std_prod": 912.8,
+      "recent_prod": 2959.3,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Yugoslav SFR",
+      "mean_prod": 4982.5,
+      "max_prod": 6627.0,
+      "std_prod": 832.3,
+      "recent_prod": 5741.0,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    },
+    {
+      "area": "Zambia",
+      "mean_prod": 446.0,
+      "max_prod": 881.5,
+      "std_prod": 261.0,
+      "recent_prod": 881.5,
+      "cluster_id": 0,
+      "tier_name": "Tier 3: Small / Artisanal Producers"
+    }
+  ],
+  "knn_prototypes": [
+    {
+      "area": "Afghanistan",
+      "raw_features": [
+        1554.44,
+        1634.61,
+        1710.47,
+        1633.17,
+        -80.17
+      ],
+      "scaled_features": [
+        -0.3262,
+        -0.3251,
+        -0.3245,
+        -0.3259,
+        -0.1036
+      ],
+      "prod_target": 1467.09,
+      "growth_target": 0
+    },
+    {
+      "area": "Albania",
+      "raw_features": [
+        5633.42,
+        5390.67,
+        4834.86,
+        5286.32,
+        242.75
+      ],
+      "scaled_features": [
+        -0.2124,
+        -0.2171,
+        -0.2319,
+        -0.2207,
+        -0.015
+      ],
+      "prod_target": 5940.2,
+      "growth_target": 1
+    },
+    {
+      "area": "Algeria",
+      "raw_features": [
+        6054.66,
+        5755.09,
+        5165.0,
+        5658.25,
+        299.57
+      ],
+      "scaled_features": [
+        -0.2006,
+        -0.2067,
+        -0.2221,
+        -0.21,
+        0.0006
+      ],
+      "prod_target": 5876.13,
+      "growth_target": 0
+    },
+    {
+      "area": "Angola",
+      "raw_features": [
+        23416.53,
+        23409.41,
+        23433.24,
+        23419.73,
+        7.12
+      ],
+      "scaled_features": [
+        0.2839,
+        0.3008,
+        0.3193,
+        0.3016,
+        -0.0796
+      ],
+      "prod_target": 23423.65,
+      "growth_target": 1
+    },
+    {
+      "area": "Argentina",
+      "raw_features": [
+        69701.22,
+        71762.14,
+        73150.61,
+        71537.99,
+        -2060.92
+      ],
+      "scaled_features": [
+        1.5757,
+        1.6905,
+        1.7927,
+        1.6875,
+        -0.647
+      ],
+      "prod_target": 69297.65,
+      "growth_target": 0
+    },
+    {
+      "area": "Armenia",
+      "raw_features": [
+        2100.0,
+        2200.0,
+        2200.0,
+        2166.67,
+        -100.0
+      ],
+      "scaled_features": [
+        -0.311,
+        -0.3089,
+        -0.31,
+        -0.3106,
+        -0.109
+      ],
+      "prod_target": 2000.0,
+      "growth_target": 0
+    },
+    {
+      "area": "Australia",
+      "raw_features": [
+        11358.14,
+        11698.45,
+        11937.28,
+        11664.62,
+        -340.31
+      ],
+      "scaled_features": [
+        -0.0526,
+        -0.0358,
+        -0.0214,
+        -0.037,
+        -0.1749
+      ],
+      "prod_target": 10980.94,
+      "growth_target": 0
+    },
+    {
+      "area": "Austria",
+      "raw_features": [
+        4300.0,
+        4300.0,
+        4100.0,
+        4233.33,
+        0.0
+      ],
+      "scaled_features": [
+        -0.2496,
+        -0.2485,
+        -0.2537,
+        -0.251,
+        -0.0816
+      ],
+      "prod_target": 5500.0,
+      "growth_target": 1
+    },
+    {
+      "area": "Azerbaijan",
+      "raw_features": [
+        4550.0,
+        7445.9,
+        6802.7,
+        6266.2,
+        -2895.9
+      ],
+      "scaled_features": [
+        -0.2426,
+        -0.1581,
+        -0.1736,
+        -0.1925,
+        -0.8761
+      ],
+      "prod_target": 4819.22,
+      "growth_target": 1
+    },
+    {
+      "area": "Belarus",
+      "raw_features": [
+        2183.0,
+        2112.0,
+        2118.0,
+        2137.67,
+        71.0
+      ],
+      "scaled_features": [
+        -0.3087,
+        -0.3114,
+        -0.3124,
+        -0.3114,
+        -0.0621
+      ],
+      "prod_target": 2256.0,
+      "growth_target": 1
+    },
+    {
+      "area": "Belgium-Luxembourg",
+      "raw_features": [
+        1040.0,
+        1761.0,
+        1000.0,
+        1267.0,
+        -721.0
+      ],
+      "scaled_features": [
+        -0.3406,
+        -0.3215,
+        -0.3455,
+        -0.3365,
+        -0.2794
+      ],
+      "prod_target": 1400.0,
+      "growth_target": 1
+    },
+    {
+      "area": "Belize",
+      "raw_features": [
+        63.0,
+        61.0,
+        56.0,
+        60.0,
+        2.0
+      ],
+      "scaled_features": [
+        -0.3678,
+        -0.3703,
+        -0.3735,
+        -0.3712,
+        -0.081
+      ],
+      "prod_target": 57.0,
+      "growth_target": 0
+    },
+    {
+      "area": "Bhutan",
+      "raw_features": [
+        41.0,
+        37.26,
+        43.19,
+        40.48,
+        3.74
+      ],
+      "scaled_features": [
+        -0.3685,
+        -0.371,
+        -0.3739,
+        -0.3718,
+        -0.0805
+      ],
+      "prod_target": 39.23,
+      "growth_target": 0
+    },
+    {
+      "area": "Bolivia (Plurinational State of)",
+      "raw_features": [
+        729.96,
+        727.8,
+        727.29,
+        728.35,
+        2.16
+      ],
+      "scaled_features": [
+        -0.3492,
+        -0.3512,
+        -0.3536,
+        -0.352,
+        -0.081
+      ],
+      "prod_target": 733.02,
+      "growth_target": 1
+    },
+    {
+      "area": "Bosnia and Herzegovina",
+      "raw_features": [
+        4280.0,
+        4720.0,
+        1876.0,
+        3625.33,
+        -440.0
+      ],
+      "scaled_features": [
+        -0.2501,
+        -0.2364,
+        -0.3196,
+        -0.2686,
+        -0.2023
+      ],
+      "prod_target": 3393.0,
+      "growth_target": 0
+    },
+    {
+      "area": "Brazil",
+      "raw_features": [
+        64164.18,
+        62494.0,
+        55679.0,
+        60779.06,
+        1670.18
+      ],
+      "scaled_features": [
+        1.4212,
+        1.4242,
+        1.2749,
+        1.3776,
+        0.3767
+      ],
+      "prod_target": 67313.99,
+      "growth_target": 1
+    },
+    {
+      "area": "Bulgaria",
+      "raw_features": [
+        10338.0,
+        11807.0,
+        10218.0,
+        10787.67,
+        -1469.0
+      ],
+      "scaled_features": [
+        -0.0811,
+        -0.0327,
+        -0.0724,
+        -0.0623,
+        -0.4846
+      ],
+      "prod_target": 11518.0,
+      "growth_target": 1
+    },
+    {
+      "area": "Burkina Faso",
+      "raw_features": [
+        267.42,
+        350.56,
+        561.7,
+        393.23,
+        -83.14
+      ],
+      "scaled_features": [
+        -0.3621,
+        -0.362,
+        -0.3585,
+        -0.3617,
+        -0.1044
+      ],
+      "prod_target": 391.34,
+      "growth_target": 1
+    },
+    {
+      "area": "Burundi",
+      "raw_features": [
+        1000.0,
+        1000.0,
+        1000.0,
+        1000.0,
+        0.0
+      ],
+      "scaled_features": [
+        -0.3417,
+        -0.3433,
+        -0.3455,
+        -0.3442,
+        -0.0816
+      ],
+      "prod_target": 929.43,
+      "growth_target": 0
+    },
+    {
+      "area": "Cameroon",
+      "raw_features": [
+        4761.42,
+        4682.04,
+        4615.07,
+        4686.18,
+        79.38
+      ],
+      "scaled_features": [
+        -0.2367,
+        -0.2375,
+        -0.2384,
+        -0.238,
+        -0.0598
+      ],
+      "prod_target": 4842.49,
+      "growth_target": 1
+    },
+    {
+      "area": "Canada",
+      "raw_features": [
+        43385.0,
+        33753.0,
+        39976.0,
+        39038.0,
+        9632.0
+      ],
+      "scaled_features": [
+        0.8412,
+        0.5981,
+        0.8095,
+        0.7514,
+        2.561
+      ],
+      "prod_target": 35460.0,
+      "growth_target": 0
+    },
+    {
+      "area": "Central African Republic",
+      "raw_features": [
+        16849.48,
+        16748.5,
+        16682.45,
+        16760.14,
+        100.98
+      ],
+      "scaled_features": [
+        0.1007,
+        0.1093,
+        0.1192,
+        0.1098,
+        -0.0539
+      ],
+      "prod_target": 16950.45,
+      "growth_target": 1
+    },
+    {
+      "area": "Central Asia",
+      "raw_features": [
+        28382.07,
+        27021.98,
+        25385.16,
+        26929.74,
+        1360.09
+      ],
+      "scaled_features": [
+        0.4225,
+        0.4046,
+        0.3771,
+        0.4027,
+        0.2916
+      ],
+      "prod_target": 30451.56,
+      "growth_target": 1
+    },
+    {
+      "area": "Chad",
+      "raw_features": [
+        1011.3,
+        1010.25,
+        1013.2,
+        1011.58,
+        1.05
+      ],
+      "scaled_features": [
+        -0.3414,
+        -0.3431,
+        -0.3451,
+        -0.3438,
+        -0.0813
+      ],
+      "prod_target": 1012.36,
+      "growth_target": 1
+    },
+    {
+      "area": "Chile",
+      "raw_features": [
+        12139.0,
+        12053.21,
+        12199.62,
+        12130.61,
+        85.79
+      ],
+      "scaled_features": [
+        -0.0308,
+        -0.0256,
+        -0.0136,
+        -0.0236,
+        -0.058
+      ],
+      "prod_target": 12224.79,
+      "growth_target": 1
+    },
+    {
+      "area": "China",
+      "raw_features": [
+        474698.0,
+        471232.0,
+        485960.0,
+        477296.67,
+        3466.0
+      ],
+      "scaled_features": [
+        12.8788,
+        13.1724,
+        14.0264,
+        13.3744,
+        0.8693
+      ],
+      "prod_target": 456024.31,
+      "growth_target": 0
+    },
+    {
+      "area": "China, Taiwan Province of",
+      "raw_features": [
+        11198.0,
+        9332.0,
+        13260.0,
+        11263.33,
+        1866.0
+      ],
+      "scaled_features": [
+        -0.0571,
+        -0.1039,
+        0.0178,
+        -0.0486,
+        0.4304
+      ],
+      "prod_target": 11224.31,
+      "growth_target": 1
+    },
+    {
+      "area": "China, mainland",
+      "raw_features": [
+        463500.0,
+        461900.0,
+        472700.0,
+        466033.33,
+        1600.0
+      ],
+      "scaled_features": [
+        12.5663,
+        12.9041,
+        13.6334,
+        13.05,
+        0.3574
+      ],
+      "prod_target": 444800.0,
+      "growth_target": 0
+    },
+    {
+      "area": "Colombia",
+      "raw_features": [
+        6599.0,
+        7000.0,
+        4650.0,
+        6083.0,
+        -401.0
+      ],
+      "scaled_features": [
+        -0.1854,
+        -0.1709,
+        -0.2374,
+        -0.1978,
+        -0.1916
+      ],
+      "prod_target": 6327.63,
+      "growth_target": 0
+    },
+    {
+      "area": "Cook Islands",
+      "raw_features": [
+        1.02,
+        1.01,
+        1.01,
+        1.01,
+        0.01
+      ],
+      "scaled_features": [
+        -0.3696,
+        -0.3721,
+        -0.3751,
+        -0.3729,
+        -0.0816
+      ],
+      "prod_target": 1.02,
+      "growth_target": 0
+    },
+    {
+      "area": "Costa Rica",
+      "raw_features": [
+        833.16,
+        798.0,
+        976.36,
+        869.17,
+        35.16
+      ],
+      "scaled_features": [
+        -0.3463,
+        -0.3492,
+        -0.3462,
+        -0.3479,
+        -0.0719
+      ],
+      "prod_target": 952.66,
+      "growth_target": 1
+    },
+    {
+      "area": "Croatia",
+      "raw_features": [
+        8295.0,
+        4673.0,
+        5215.0,
+        6061.0,
+        3622.0
+      ],
+      "scaled_features": [
+        -0.1381,
+        -0.2378,
+        -0.2206,
+        -0.1984,
+        0.9121
+      ],
+      "prod_target": 8405.0,
+      "growth_target": 1
+    },
+    {
+      "area": "Cuba",
+      "raw_features": [
+        6700.0,
+        9200.0,
+        10500.0,
+        8800.0,
+        -2500.0
+      ],
+      "scaled_features": [
+        -0.1826,
+        -0.1077,
+        -0.064,
+        -0.1195,
+        -0.7675
+      ],
+      "prod_target": 7369.05,
+      "growth_target": 1
+    },
+    {
+      "area": "Cyprus",
+      "raw_features": [
+        584.0,
+        515.0,
+        246.0,
+        448.33,
+        69.0
+      ],
+      "scaled_features": [
+        -0.3533,
+        -0.3573,
+        -0.3679,
+        -0.3601,
+        -0.0626
+      ],
+      "prod_target": 660.0,
+      "growth_target": 1
+    },
+    {
+      "area": "Czechia",
+      "raw_features": [
+        5942.0,
+        7771.0,
+        6086.0,
+        6599.67,
+        -1829.0
+      ],
+      "scaled_features": [
+        -0.2038,
+        -0.1487,
+        -0.1948,
+        -0.1829,
+        -0.5834
+      ],
+      "prod_target": 7418.0,
+      "growth_target": 1
+    },
+    {
+      "area": "Czechoslovakia",
+      "raw_features": [
+        8790.0,
+        11973.0,
+        12474.0,
+        11079.0,
+        -3183.0
+      ],
+      "scaled_features": [
+        -0.1243,
+        -0.028,
+        -0.0055,
+        -0.0539,
+        -0.9548
+      ],
+      "prod_target": 9275.0,
+      "growth_target": 1
+    },
+    {
+      "area": "C\u00f4te d'Ivoire",
+      "raw_features": [
+        618.73,
+        618.19,
+        619.24,
+        618.72,
+        0.54
+      ],
+      "scaled_features": [
+        -0.3523,
+        -0.3543,
+        -0.3568,
+        -0.3552,
+        -0.0814
+      ],
+      "prod_target": 619.26,
+      "growth_target": 1
+    },
+    {
+      "area": "Denmark",
+      "raw_features": [
+        1500.0,
+        1500.0,
+        1500.0,
+        1500.0,
+        0.0
+      ],
+      "scaled_features": [
+        -0.3277,
+        -0.329,
+        -0.3307,
+        -0.3298,
+        -0.0816
+      ],
+      "prod_target": 1500.0,
+      "growth_target": 0
+    },
+    {
+      "area": "Dominican Republic",
+      "raw_features": [
+        751.58,
+        804.33,
+        1124.0,
+        893.3,
+        -52.75
+      ],
+      "scaled_features": [
+        -0.3486,
+        -0.349,
+        -0.3419,
+        -0.3472,
+        -0.096
+      ],
+      "prod_target": 866.99,
+      "growth_target": 1
+    },
+    {
+      "area": "Eastern Africa",
+      "raw_features": [
+        153740.77,
+        135706.69,
+        167953.82,
+        152467.09,
+        18034.08
+      ],
+      "scaled_features": [
+        3.9212,
+        3.5285,
+        4.6022,
+        4.0185,
+        4.8662
+      ],
+      "prod_target": 171042.41,
+      "growth_target": 1
+    },
+    {
+      "area": "Ecuador",
+      "raw_features": [
+        891.62,
+        888.33,
+        888.6,
+        889.52,
+        3.29
+      ],
+      "scaled_features": [
+        -0.3447,
+        -0.3466,
+        -0.3488,
+        -0.3474,
+        -0.0807
+      ],
+      "prod_target": 894.92,
+      "growth_target": 1
+    },
+    {
+      "area": "Egypt",
+      "raw_features": [
+        3838.0,
+        3714.0,
+        4165.0,
+        3905.67,
+        124.0
+      ],
+      "scaled_features": [
+        -0.2625,
+        -0.2653,
+        -0.2517,
+        -0.2605,
+        -0.0476
+      ],
+      "prod_target": 3782.06,
+      "growth_target": 0
+    },
+    {
+      "area": "El Salvador",
+      "raw_features": [
+        1899.82,
+        2004.94,
+        2010.24,
+        1971.67,
+        -105.12
+      ],
+      "scaled_features": [
+        -0.3166,
+        -0.3145,
+        -0.3156,
+        -0.3162,
+        -0.1104
+      ],
+      "prod_target": 1840.8,
+      "growth_target": 0
+    },
+    {
+      "area": "Estonia",
+      "raw_features": [
+        1602.0,
+        1631.0,
+        1343.0,
+        1525.33,
+        -29.0
+      ],
+      "scaled_features": [
+        -0.3249,
+        -0.3252,
+        -0.3354,
+        -0.329,
+        -0.0895
+      ],
+      "prod_target": 1313.0,
+      "growth_target": 0
+    },
+    {
+      "area": "Ethiopia",
+      "raw_features": [
+        71612.57,
+        52034.41,
+        88153.54,
+        70600.17,
+        19578.16
+      ],
+      "scaled_features": [
+        1.629,
+        1.1235,
+        2.2373,
+        1.6605,
+        5.2898
+      ],
+      "prod_target": 85959.95,
+      "growth_target": 1
+    },
+    {
+      "area": "Ethiopia PDR",
+      "raw_features": [
+        23400.0,
+        23000.0,
+        22800.0,
+        23066.67,
+        400.0
+      ],
+      "scaled_features": [
+        0.2835,
+        0.289,
+        0.3005,
+        0.2914,
+        0.0282
+      ],
+      "prod_target": 23700.0,
+      "growth_target": 1
+    },
+    {
+      "area": "Fiji",
+      "raw_features": [
+        486.0,
+        378.0,
+        285.0,
+        383.0,
+        108.0
+      ],
+      "scaled_features": [
+        -0.356,
+        -0.3612,
+        -0.3667,
+        -0.3619,
+        -0.0519
+      ],
+      "prod_target": 375.0,
+      "growth_target": 0
+    },
+    {
+      "area": "Finland",
+      "raw_features": [
+        1800.0,
+        3300.0,
+        3100.0,
+        2733.33,
+        -1500.0
+      ],
+      "scaled_features": [
+        -0.3194,
+        -0.2772,
+        -0.2833,
+        -0.2942,
+        -0.4931
+      ],
+      "prod_target": 2300.0,
+      "growth_target": 1
+    },
+    {
+      "area": "France",
+      "raw_features": [
+        24021.0,
+        20019.0,
+        14960.0,
+        19666.67,
+        4002.0
+      ],
+      "scaled_features": [
+        0.3008,
+        0.2033,
+        0.0682,
+        0.1935,
+        1.0164
+      ],
+      "prod_target": 20034.0,
+      "growth_target": 0
+    },
+    {
+      "area": "French Polynesia",
+      "raw_features": [
+        122.66,
+        121.82,
+        121.9,
+        122.13,
+        0.84
+      ],
+      "scaled_features": [
+        -0.3662,
+        -0.3686,
+        -0.3716,
+        -0.3695,
+        -0.0813
+      ],
+      "prod_target": 121.75,
+      "growth_target": 0
+    },
+    {
+      "area": "Georgia",
+      "raw_features": [
+        2100.0,
+        2000.0,
+        2000.0,
+        2033.33,
+        100.0
+      ],
+      "scaled_features": [
+        -0.311,
+        -0.3146,
+        -0.3159,
+        -0.3144,
+        -0.0541
+      ],
+      "prod_target": 1900.0,
+      "growth_target": 0
+    },
+    {
+      "area": "Germany",
+      "raw_features": [
+        33800.0,
+        34100.0,
+        19600.0,
+        29166.67,
+        -300.0
+      ],
+      "scaled_features": [
+        0.5737,
+        0.608,
+        0.2057,
+        0.4671,
+        -0.1639
+      ],
+      "prod_target": 31800.0,
+      "growth_target": 0
+    },
+    {
+      "area": "Greece",
+      "raw_features": [
+        27633.0,
+        23469.0,
+        22807.0,
+        24636.33,
+        4164.0
+      ],
+      "scaled_features": [
+        0.4016,
+        0.3025,
+        0.3007,
+        0.3366,
+        1.0608
+      ],
+      "prod_target": 24841.0,
+      "growth_target": 0
+    },
+    {
+      "area": "Guadeloupe",
+      "raw_features": [
+        4.0,
+        4.0,
+        10.0,
+        6.0,
+        0.0
+      ],
+      "scaled_features": [
+        -0.3695,
+        -0.372,
+        -0.3749,
+        -0.3728,
+        -0.0816
+      ],
+      "prod_target": 4.0,
+      "growth_target": 0
+    },
+    {
+      "area": "Guatemala",
+      "raw_features": [
+        2300.0,
+        2000.0,
+        3396.28,
+        2565.43,
+        300.0
+      ],
+      "scaled_features": [
+        -0.3054,
+        -0.3146,
+        -0.2745,
+        -0.2991,
+        0.0007
+      ],
+      "prod_target": 2202.97,
+      "growth_target": 0
+    },
+    {
+      "area": "Guinea",
+      "raw_features": [
+        1051.54,
+        1037.39,
+        1026.04,
+        1038.32,
+        14.15
+      ],
+      "scaled_features": [
+        -0.3402,
+        -0.3423,
+        -0.3448,
+        -0.3431,
+        -0.0777
+      ],
+      "prod_target": 1065.04,
+      "growth_target": 1
+    },
+    {
+      "area": "Guinea-Bissau",
+      "raw_features": [
+        169.83,
+        166.62,
+        163.24,
+        166.56,
+        3.21
+      ],
+      "scaled_features": [
+        -0.3649,
+        -0.3673,
+        -0.3703,
+        -0.3682,
+        -0.0807
+      ],
+      "prod_target": 172.87,
+      "growth_target": 1
+    },
+    {
+      "area": "Guyana",
+      "raw_features": [
+        89.87,
+        89.47,
+        89.01,
+        89.45,
+        0.4
+      ],
+      "scaled_features": [
+        -0.3671,
+        -0.3695,
+        -0.3725,
+        -0.3704,
+        -0.0815
+      ],
+      "prod_target": 90.28,
+      "growth_target": 1
+    },
+    {
+      "area": "Haiti",
+      "raw_features": [
+        313.09,
+        324.37,
+        326.33,
+        321.26,
+        -11.28
+      ],
+      "scaled_features": [
+        -0.3609,
+        -0.3628,
+        -0.3655,
+        -0.3637,
+        -0.0847
+      ],
+      "prod_target": 298.23,
+      "growth_target": 0
+    },
+    {
+      "area": "Honduras",
+      "raw_features": [
+        98.78,
+        106.37,
+        113.36,
+        106.17,
+        -7.59
+      ],
+      "scaled_features": [
+        -0.3668,
+        -0.369,
+        -0.3718,
+        -0.3699,
+        -0.0837
+      ],
+      "prod_target": 90.88,
+      "growth_target": 0
+    },
+    {
+      "area": "Hungary",
+      "raw_features": [
+        18000.0,
+        29000.0,
+        32000.0,
+        26333.33,
+        -11000.0
+      ],
+      "scaled_features": [
+        0.1328,
+        0.4614,
+        0.5732,
+        0.3855,
+        -3.0995
+      ],
+      "prod_target": 14000.0,
+      "growth_target": 0
+    },
+    {
+      "area": "India",
+      "raw_features": [
+        105000.0,
+        90000.0,
+        74000.0,
+        89666.67,
+        15000.0
+      ],
+      "scaled_features": [
+        2.5609,
+        2.2147,
+        1.8178,
+        2.2097,
+        4.0338
+      ],
+      "prod_target": 146000.0,
+      "growth_target": 1
+    },
+    {
+      "area": "Iran (Islamic Republic of)",
+      "raw_features": [
+        78012.36,
+        76266.83,
+        74624.21,
+        76301.13,
+        1745.53
+      ],
+      "scaled_features": [
+        1.8077,
+        1.82,
+        1.8363,
+        1.8247,
+        0.3973
+      ],
+      "prod_target": 80249.19,
+      "growth_target": 1
+    },
+    {
+      "area": "Iraq",
+      "raw_features": [
+        110.09,
+        115.65,
+        110.0,
+        111.91,
+        -5.56
+      ],
+      "scaled_features": [
+        -0.3665,
+        -0.3688,
+        -0.3719,
+        -0.3698,
+        -0.0831
+      ],
+      "prod_target": 110.13,
+      "growth_target": 1
+    },
+    {
+      "area": "Ireland",
+      "raw_features": [
+        264.74,
+        264.48,
+        258.42,
+        262.55,
+        0.26
+      ],
+      "scaled_features": [
+        -0.3622,
+        -0.3645,
+        -0.3675,
+        -0.3654,
+        -0.0815
+      ],
+      "prod_target": 267.68,
+      "growth_target": 1
+    },
+    {
+      "area": "Israel",
+      "raw_features": [
+        3500.0,
+        4500.0,
+        4000.0,
+        4000.0,
+        -1000.0
+      ],
+      "scaled_features": [
+        -0.2719,
+        -0.2427,
+        -0.2566,
+        -0.2578,
+        -0.3559
+      ],
+      "prod_target": 3800.0,
+      "growth_target": 1
+    },
+    {
+      "area": "Italy",
+      "raw_features": [
+        22028.0,
+        25155.0,
+        12450.0,
+        19877.67,
+        -3127.0
+      ],
+      "scaled_features": [
+        0.2452,
+        0.3509,
+        -0.0062,
+        0.1996,
+        -0.9395
+      ],
+      "prod_target": 21857.0,
+      "growth_target": 0
+    },
+    {
+      "area": "Jamaica",
+      "raw_features": [
+        765.82,
+        765.57,
+        766.29,
+        765.89,
+        0.25
+      ],
+      "scaled_features": [
+        -0.3482,
+        -0.3501,
+        -0.3525,
+        -0.3509,
+        -0.0815
+      ],
+      "prod_target": 766.07,
+      "growth_target": 1
+    },
+    {
+      "area": "Japan",
+      "raw_features": [
+        2636.0,
+        2527.0,
+        2745.0,
+        2636.0,
+        109.0
+      ],
+      "scaled_features": [
+        -0.296,
+        -0.2995,
+        -0.2938,
+        -0.2971,
+        -0.0517
+      ],
+      "prod_target": 2637.13,
+      "growth_target": 1
+    },
+    {
+      "area": "Jordan",
+      "raw_features": [
+        325.0,
+        392.3,
+        244.0,
+        320.43,
+        -67.3
+      ],
+      "scaled_features": [
+        -0.3605,
+        -0.3608,
+        -0.3679,
+        -0.3637,
+        -0.1
+      ],
+      "prod_target": 418.0,
+      "growth_target": 1
+    },
+    {
+      "area": "Kazakhstan",
+      "raw_features": [
+        3989.2,
+        3910.7,
+        3691.2,
+        3863.7,
+        78.5
+      ],
+      "scaled_features": [
+        -0.2583,
+        -0.2597,
+        -0.2658,
+        -0.2617,
+        -0.06
+      ],
+      "prod_target": 4990.6,
+      "growth_target": 1
+    },
+    {
+      "area": "Kenya",
+      "raw_features": [
+        17151.0,
+        19777.0,
+        17265.0,
+        18064.33,
+        -2626.0
+      ],
+      "scaled_features": [
+        0.1091,
+        0.1964,
+        0.1365,
+        0.1473,
+        -0.802
+      ],
+      "prod_target": 19462.0,
+      "growth_target": 1
+    },
+    {
+      "area": "Kyrgyzstan",
+      "raw_features": [
+        2945.5,
+        2970.0,
+        2364.0,
+        2759.83,
+        -24.5
+      ],
+      "scaled_features": [
+        -0.2874,
+        -0.2867,
+        -0.3051,
+        -0.2935,
+        -0.0883
+      ],
+      "prod_target": 3014.0,
+      "growth_target": 1
+    },
+    {
+      "area": "Land Locked Developing Countries (LLDCs)",
+      "raw_features": [
+        169915.74,
+        151967.35,
+        184168.93,
+        168684.01,
+        17948.39
+      ],
+      "scaled_features": [
+        4.3726,
+        3.9959,
+        5.0827,
+        4.4856,
+        4.8427
+      ],
+      "prod_target": 189326.76,
+      "growth_target": 1
+    },
+    {
+      "area": "Latvia",
+      "raw_features": [
+        2319.0,
+        2302.0,
+        2135.0,
+        2252.0,
+        17.0
+      ],
+      "scaled_features": [
+        -0.3049,
+        -0.3059,
+        -0.3119,
+        -0.3081,
+        -0.0769
+      ],
+      "prod_target": 2193.0,
+      "growth_target": 0
+    },
+    {
+      "area": "Least Developed Countries (LDCs)",
+      "raw_features": [
+        199921.97,
+        179860.97,
+        214314.6,
+        198032.51,
+        20061.0
+      ],
+      "scaled_features": [
+        5.21,
+        4.7976,
+        5.9761,
+        5.3309,
+        5.4223
+      ],
+      "prod_target": 218276.3,
+      "growth_target": 1
+    },
+    {
+      "area": "Lebanon",
+      "raw_features": [
+        1275.7,
+        1337.77,
+        1364.65,
+        1326.04,
+        -62.07
+      ],
+      "scaled_features": [
+        -0.334,
+        -0.3336,
+        -0.3347,
+        -0.3348,
+        -0.0986
+      ],
+      "prod_target": 1231.44,
+      "growth_target": 0
+    },
+    {
+      "area": "Libya",
+      "raw_features": [
+        786.34,
+        779.7,
+        790.0,
+        785.35,
+        6.64
+      ],
+      "scaled_features": [
+        -0.3477,
+        -0.3497,
+        -0.3518,
+        -0.3504,
+        -0.0797
+      ],
+      "prod_target": 786.62,
+      "growth_target": 1
+    },
+    {
+      "area": "Lithuania",
+      "raw_features": [
+        5666.0,
+        6017.0,
+        7894.0,
+        6525.67,
+        -351.0
+      ],
+      "scaled_features": [
+        -0.2115,
+        -0.1991,
+        -0.1412,
+        -0.185,
+        -0.1779
+      ],
+      "prod_target": 5884.0,
+      "growth_target": 1
+    },
+    {
+      "area": "Low Income Food Deficit Countries (LIFDCs)",
+      "raw_features": [
+        221619.33,
+        202034.8,
+        231270.06,
+        218308.06,
+        19584.53
+      ],
+      "scaled_features": [
+        5.8156,
+        5.4349,
+        6.4786,
+        5.9149,
+        5.2915
+      ],
+      "prod_target": 241832.19,
+      "growth_target": 1
+    },
+    {
+      "area": "Luxembourg",
+      "raw_features": [
+        143.0,
+        88.1,
+        48.2,
+        93.1,
+        54.9
+      ],
+      "scaled_features": [
+        -0.3656,
+        -0.3696,
+        -0.3737,
+        -0.3703,
+        -0.0665
+      ],
+      "prod_target": 53.1,
+      "growth_target": 0
+    },
+    {
+      "area": "Madagascar",
+      "raw_features": [
+        3991.62,
+        3987.96,
+        3985.32,
+        3988.3,
+        3.66
+      ],
+      "scaled_features": [
+        -0.2582,
+        -0.2575,
+        -0.2571,
+        -0.2581,
+        -0.0806
+      ],
+      "prod_target": 3995.28,
+      "growth_target": 1
+    },
+    {
+      "area": "Mali",
+      "raw_features": [
+        734.04,
+        388.66,
+        429.17,
+        517.29,
+        345.38
+      ],
+      "scaled_features": [
+        -0.3491,
+        -0.3609,
+        -0.3625,
+        -0.3581,
+        0.0132
+      ],
+      "prod_target": 1729.02,
+      "growth_target": 1
+    },
+    {
+      "area": "Mexico",
+      "raw_features": [
+        58033.18,
+        64320.37,
+        62078.97,
+        61477.51,
+        -6287.19
+      ],
+      "scaled_features": [
+        1.2501,
+        1.4766,
+        1.4645,
+        1.3977,
+        -1.8065
+      ],
+      "prod_target": 57430.36,
+      "growth_target": 0
+    },
+    {
+      "area": "Middle Africa",
+      "raw_features": [
+        46038.73,
+        45850.2,
+        45743.96,
+        45877.63,
+        188.53
+      ],
+      "scaled_features": [
+        0.9153,
+        0.9458,
+        0.9805,
+        0.9484,
+        -0.0298
+      ],
+      "prod_target": 46228.95,
+      "growth_target": 1
+    },
+    {
+      "area": "Mongolia",
+      "raw_features": [
+        263.0,
+        174.77,
+        478.61,
+        305.46,
+        88.23
+      ],
+      "scaled_features": [
+        -0.3623,
+        -0.3671,
+        -0.361,
+        -0.3642,
+        -0.0574
+      ],
+      "prod_target": 283.34,
+      "growth_target": 1
+    },
+    {
+      "area": "Montenegro",
+      "raw_features": [
+        1175.0,
+        1055.0,
+        715.0,
+        981.67,
+        120.0
+      ],
+      "scaled_features": [
+        -0.3368,
+        -0.3418,
+        -0.354,
+        -0.3447,
+        -0.0486
+      ],
+      "prod_target": 622.0,
+      "growth_target": 0
+    },
+    {
+      "area": "Morocco",
+      "raw_features": [
+        8000.0,
+        7500.0,
+        7300.0,
+        7600.0,
+        500.0
+      ],
+      "scaled_features": [
+        -0.1463,
+        -0.1565,
+        -0.1588,
+        -0.1541,
+        0.0556
+      ],
+      "prod_target": 8000.0,
+      "growth_target": 0
+    },
+    {
+      "area": "Mozambique",
+      "raw_features": [
+        596.82,
+        593.9,
+        594.32,
+        595.01,
+        2.92
+      ],
+      "scaled_features": [
+        -0.3529,
+        -0.355,
+        -0.3576,
+        -0.3558,
+        -0.0808
+      ],
+      "prod_target": 599.74,
+      "growth_target": 1
+    },
+    {
+      "area": "Myanmar",
+      "raw_features": [
+        4352.1,
+        4560.0,
+        5308.3,
+        4740.13,
+        -207.9
+      ],
+      "scaled_features": [
+        -0.2481,
+        -0.241,
+        -0.2179,
+        -0.2364,
+        -0.1386
+      ],
+      "prod_target": 5640.8,
+      "growth_target": 1
+    },
+    {
+      "area": "Nepal",
+      "raw_features": [
+        4308.0,
+        5168.0,
+        4062.0,
+        4512.67,
+        -860.0
+      ],
+      "scaled_features": [
+        -0.2494,
+        -0.2235,
+        -0.2548,
+        -0.243,
+        -0.3175
+      ],
+      "prod_target": 4332.1,
+      "growth_target": 1
+    },
+    {
+      "area": "Netherlands (Kingdom of the)",
+      "raw_features": [
+        500.0,
+        500.0,
+        500.0,
+        500.0,
+        0.0
+      ],
+      "scaled_features": [
+        -0.3556,
+        -0.3577,
+        -0.3604,
+        -0.3586,
+        -0.0816
+      ],
+      "prod_target": 500.0,
+      "growth_target": 0
+    },
+    {
+      "area": "New Caledonia",
+      "raw_features": [
+        195.41,
+        183.0,
+        221.0,
+        199.8,
+        12.41
+      ],
+      "scaled_features": [
+        -0.3641,
+        -0.3668,
+        -0.3686,
+        -0.3672,
+        -0.0782
+      ],
+      "prod_target": 229.44,
+      "growth_target": 1
+    },
+    {
+      "area": "New Zealand",
+      "raw_features": [
+        12000.0,
+        22000.0,
+        20500.0,
+        18166.67,
+        -10000.0
+      ],
+      "scaled_features": [
+        -0.0347,
+        0.2602,
+        0.2323,
+        0.1503,
+        -2.8251
+      ],
+      "prod_target": 17500.0,
+      "growth_target": 1
+    },
+    {
+      "area": "Nicaragua",
+      "raw_features": [
+        1359.2,
+        1175.28,
+        978.43,
+        1170.97,
+        183.92
+      ],
+      "scaled_features": [
+        -0.3317,
+        -0.3383,
+        -0.3462,
+        -0.3392,
+        -0.0311
+      ],
+      "prod_target": 1690.0,
+      "growth_target": 1
+    },
+    {
+      "area": "Niue",
+      "raw_features": [
+        7.21,
+        7.19,
+        7.21,
+        7.2,
+        0.02
+      ],
+      "scaled_features": [
+        -0.3694,
+        -0.3719,
+        -0.375,
+        -0.3728,
+        -0.0816
+      ],
+      "prod_target": 7.22,
+      "growth_target": 1
+    },
+    {
+      "area": "North Macedonia",
+      "raw_features": [
+        2947.0,
+        3275.0,
+        2814.0,
+        3012.0,
+        -328.0
+      ],
+      "scaled_features": [
+        -0.2873,
+        -0.278,
+        -0.2918,
+        -0.2862,
+        -0.1716
+      ],
+      "prod_target": 3651.0,
+      "growth_target": 1
+    },
+    {
+      "area": "Northern Africa",
+      "raw_features": [
+        23074.02,
+        22119.62,
+        21846.02,
+        22346.55,
+        954.4
+      ],
+      "scaled_features": [
+        0.2744,
+        0.2637,
+        0.2722,
+        0.2707,
+        0.1803
+      ],
+      "prod_target": 22864.9,
+      "growth_target": 0
+    },
+    {
+      "area": "Norway",
+      "raw_features": [
+        1510.0,
+        1690.0,
+        1690.0,
+        1630.0,
+        -180.0
+      ],
+      "scaled_features": [
+        -0.3275,
+        -0.3235,
+        -0.3251,
+        -0.326,
+        -0.131
+      ],
+      "prod_target": 1510.0,
+      "growth_target": 0
+    },
+    {
+      "area": "Oman",
+      "raw_features": [
+        623.31,
+        533.7,
+        947.84,
+        701.62,
+        89.61
+      ],
+      "scaled_features": [
+        -0.3522,
+        -0.3568,
+        -0.3471,
+        -0.3528,
+        -0.057
+      ],
+      "prod_target": 765.0,
+      "growth_target": 1
+    },
+    {
+      "area": "Pakistan",
+      "raw_features": [
+        5000.0,
+        4700.0,
+        4496.11,
+        4732.04,
+        300.0
+      ],
+      "scaled_features": [
+        -0.2301,
+        -0.237,
+        -0.2419,
+        -0.2367,
+        0.0007
+      ],
+      "prod_target": 5277.16,
+      "growth_target": 1
+    },
+    {
+      "area": "Palestine",
+      "raw_features": [
+        540.0,
+        472.4,
+        430.54,
+        480.98,
+        67.6
+      ],
+      "scaled_features": [
+        -0.3545,
+        -0.3585,
+        -0.3624,
+        -0.3591,
+        -0.063
+      ],
+      "prod_target": 500.0,
+      "growth_target": 0
+    },
+    {
+      "area": "Panama",
+      "raw_features": [
+        241.0,
+        238.0,
+        201.0,
+        226.67,
+        3.0
+      ],
+      "scaled_features": [
+        -0.3629,
+        -0.3652,
+        -0.3692,
+        -0.3664,
+        -0.0807
+      ],
+      "prod_target": 248.0,
+      "growth_target": 1
+    },
+    {
+      "area": "Papua New Guinea",
+      "raw_features": [
+        155.69,
+        155.78,
+        156.08,
+        155.85,
+        -0.09
+      ],
+      "scaled_features": [
+        -0.3653,
+        -0.3676,
+        -0.3706,
+        -0.3685,
+        -0.0816
+      ],
+      "prod_target": 155.6,
+      "growth_target": 0
+    },
+    {
+      "area": "Paraguay",
+      "raw_features": [
+        1889.57,
+        1880.37,
+        1871.9,
+        1880.61,
+        9.2
+      ],
+      "scaled_features": [
+        -0.3169,
+        -0.318,
+        -0.3197,
+        -0.3188,
+        -0.079
+      ],
+      "prod_target": 1898.77,
+      "growth_target": 1
+    },
+    {
+      "area": "Peru",
+      "raw_features": [
+        1682.73,
+        1668.85,
+        1676.19,
+        1675.92,
+        13.88
+      ],
+      "scaled_features": [
+        -0.3226,
+        -0.3241,
+        -0.3255,
+        -0.3247,
+        -0.0778
+      ],
+      "prod_target": 1672.35,
+      "growth_target": 0
+    },
+    {
+      "area": "Poland",
+      "raw_features": [
+        19031.0,
+        23472.0,
+        17089.0,
+        19864.0,
+        -4441.0
+      ],
+      "scaled_features": [
+        0.1615,
+        0.3026,
+        0.1313,
+        0.1992,
+        -1.3
+      ],
+      "prod_target": 24000.0,
+      "growth_target": 1
+    },
+    {
+      "area": "Portugal",
+      "raw_features": [
+        11465.0,
+        10441.0,
+        9817.0,
+        10574.33,
+        1024.0
+      ],
+      "scaled_features": [
+        -0.0496,
+        -0.072,
+        -0.0842,
+        -0.0684,
+        0.1994
+      ],
+      "prod_target": 8915.0,
+      "growth_target": 0
+    },
+    {
+      "area": "Puerto Rico",
+      "raw_features": [
+        402.68,
+        350.0,
+        245.67,
+        332.78,
+        52.68
+      ],
+      "scaled_features": [
+        -0.3584,
+        -0.362,
+        -0.3679,
+        -0.3634,
+        -0.0671
+      ],
+      "prod_target": 142.47,
+      "growth_target": 0
+    },
+    {
+      "area": "Republic of Korea",
+      "raw_features": [
+        30340.4,
+        29471.38,
+        28404.93,
+        29405.57,
+        869.02
+      ],
+      "scaled_features": [
+        0.4772,
+        0.475,
+        0.4666,
+        0.474,
+        0.1568
+      ],
+      "prod_target": 31216.45,
+      "growth_target": 1
+    },
+    {
+      "area": "Republic of Moldova",
+      "raw_features": [
+        4451.24,
+        4463.0,
+        5038.0,
+        4650.75,
+        -11.76
+      ],
+      "scaled_features": [
+        -0.2454,
+        -0.2438,
+        -0.2259,
+        -0.239,
+        -0.0848
+      ],
+      "prod_target": 4485.35,
+      "growth_target": 1
+    },
+    {
+      "area": "Romania",
+      "raw_features": [
+        29760.0,
+        30831.0,
+        30714.0,
+        30435.0,
+        -1071.0
+      ],
+      "scaled_features": [
+        0.461,
+        0.5141,
+        0.535,
+        0.5036,
+        -0.3754
+      ],
+      "prod_target": 31541.0,
+      "growth_target": 1
+    },
+    {
+      "area": "Russian Federation",
+      "raw_features": [
+        64511.0,
+        67014.0,
+        64533.0,
+        65352.67,
+        -2503.0
+      ],
+      "scaled_features": [
+        1.4308,
+        1.5541,
+        1.5373,
+        1.5093,
+        -0.7683
+      ],
+      "prod_target": 65455.11,
+      "growth_target": 1
+    },
+    {
+      "area": "Rwanda",
+      "raw_features": [
+        5482.59,
+        5304.67,
+        5157.07,
+        5314.78,
+        177.92
+      ],
+      "scaled_features": [
+        -0.2166,
+        -0.2196,
+        -0.2223,
+        -0.2199,
+        -0.0328
+      ],
+      "prod_target": 5676.92,
+      "growth_target": 1
+    },
+    {
+      "area": "R\u00e9union",
+      "raw_features": [
+        86.0,
+        88.0,
+        91.0,
+        88.33,
+        -2.0
+      ],
+      "scaled_features": [
+        -0.3672,
+        -0.3696,
+        -0.3725,
+        -0.3704,
+        -0.0821
+      ],
+      "prod_target": 89.0,
+      "growth_target": 1
+    },
+    {
+      "area": "Samoa",
+      "raw_features": [
+        185.95,
+        189.97,
+        194.8,
+        190.24,
+        -4.02
+      ],
+      "scaled_features": [
+        -0.3644,
+        -0.3666,
+        -0.3694,
+        -0.3675,
+        -0.0827
+      ],
+      "prod_target": 180.25,
+      "growth_target": 0
+    },
+    {
+      "area": "Saudi Arabia",
+      "raw_features": [
+        5833.0,
+        5800.0,
+        5000.0,
+        5544.33,
+        33.0
+      ],
+      "scaled_features": [
+        -0.2068,
+        -0.2054,
+        -0.227,
+        -0.2133,
+        -0.0725
+      ],
+      "prod_target": 5779.05,
+      "growth_target": 0
+    },
+    {
+      "area": "Senegal",
+      "raw_features": [
+        3657.65,
+        3642.06,
+        3629.94,
+        3643.22,
+        15.59
+      ],
+      "scaled_features": [
+        -0.2675,
+        -0.2674,
+        -0.2676,
+        -0.268,
+        -0.0773
+      ],
+      "prod_target": 3673.25,
+      "growth_target": 1
+    },
+    {
+      "area": "Serbia",
+      "raw_features": [
+        11346.0,
+        14228.0,
+        7438.0,
+        11004.0,
+        -2882.0
+      ],
+      "scaled_features": [
+        -0.0529,
+        0.0369,
+        -0.1547,
+        -0.056,
+        -0.8723
+      ],
+      "prod_target": 14664.0,
+      "growth_target": 1
+    },
+    {
+      "area": "Serbia and Montenegro",
+      "raw_features": [
+        3972.0,
+        3627.0,
+        2924.0,
+        3507.67,
+        345.0
+      ],
+      "scaled_features": [
+        -0.2587,
+        -0.2678,
+        -0.2885,
+        -0.2719,
+        0.0131
+      ],
+      "prod_target": 4275.0,
+      "growth_target": 1
+    },
+    {
+      "area": "Sierra Leone",
+      "raw_features": [
+        1352.0,
+        1200.39,
+        1055.47,
+        1202.62,
+        151.61
+      ],
+      "scaled_features": [
+        -0.3319,
+        -0.3376,
+        -0.3439,
+        -0.3383,
+        -0.04
+      ],
+      "prod_target": 2240.35,
+      "growth_target": 1
+    },
+    {
+      "area": "Slovakia",
+      "raw_features": [
+        4296.0,
+        4108.0,
+        4080.0,
+        4161.33,
+        188.0
+      ],
+      "scaled_features": [
+        -0.2497,
+        -0.254,
+        -0.2543,
+        -0.2531,
+        -0.03
+      ],
+      "prod_target": 4212.0,
+      "growth_target": 0
+    },
+    {
+      "area": "Slovenia",
+      "raw_features": [
+        2405.0,
+        1252.0,
+        1293.0,
+        1650.0,
+        1153.0
+      ],
+      "scaled_features": [
+        -0.3025,
+        -0.3361,
+        -0.3369,
+        -0.3255,
+        0.2348
+      ],
+      "prod_target": 1094.0,
+      "growth_target": 0
+    },
+    {
+      "area": "Small Island Developing States (SIDS)",
+      "raw_features": [
+        11200.04,
+        13507.34,
+        14934.09,
+        13213.82,
+        -2307.3
+      ],
+      "scaled_features": [
+        -0.057,
+        0.0161,
+        0.0674,
+        0.0076,
+        -0.7146
+      ],
+      "prod_target": 11585.78,
+      "growth_target": 1
+    },
+    {
+      "area": "South Africa",
+      "raw_features": [
+        1083.82,
+        1083.53,
+        1083.85,
+        1083.73,
+        0.29
+      ],
+      "scaled_features": [
+        -0.3393,
+        -0.3409,
+        -0.3431,
+        -0.3418,
+        -0.0815
+      ],
+      "prod_target": 1084.11,
+      "growth_target": 1
+    },
+    {
+      "area": "Southern Africa",
+      "raw_features": [
+        1083.82,
+        1083.53,
+        1083.85,
+        1083.73,
+        0.29
+      ],
+      "scaled_features": [
+        -0.3393,
+        -0.3409,
+        -0.3431,
+        -0.3418,
+        -0.0815
+      ],
+      "prod_target": 1084.11,
+      "growth_target": 1
+    },
+    {
+      "area": "Spain",
+      "raw_features": [
+        27423.0,
+        27400.0,
+        34065.0,
+        29629.33,
+        23.0
+      ],
+      "scaled_features": [
+        0.3958,
+        0.4155,
+        0.6343,
+        0.4804,
+        -0.0753
+      ],
+      "prod_target": 33181.0,
+      "growth_target": 1
+    },
+    {
+      "area": "Sudan",
+      "raw_features": [
+        744.82,
+        744.64,
+        744.84,
+        744.77,
+        0.18
+      ],
+      "scaled_features": [
+        -0.3488,
+        -0.3507,
+        -0.3531,
+        -0.3515,
+        -0.0815
+      ],
+      "prod_target": 745.01,
+      "growth_target": 1
+    },
+    {
+      "area": "Sudan (former)",
+      "raw_features": [
+        730.0,
+        730.0,
+        730.0,
+        730.0,
+        0.0
+      ],
+      "scaled_features": [
+        -0.3492,
+        -0.3511,
+        -0.3535,
+        -0.352,
+        -0.0816
+      ],
+      "prod_target": 735.0,
+      "growth_target": 1
+    },
+    {
+      "area": "Suriname",
+      "raw_features": [
+        40.0,
+        38.0,
+        37.0,
+        38.33,
+        2.0
+      ],
+      "scaled_features": [
+        -0.3685,
+        -0.371,
+        -0.3741,
+        -0.3719,
+        -0.081
+      ],
+      "prod_target": 41.3,
+      "growth_target": 1
+    },
+    {
+      "area": "Sweden",
+      "raw_features": [
+        3281.29,
+        3426.76,
+        4091.0,
+        3599.68,
+        -145.47
+      ],
+      "scaled_features": [
+        -0.278,
+        -0.2736,
+        -0.2539,
+        -0.2693,
+        -0.1215
+      ],
+      "prod_target": 3400.0,
+      "growth_target": 1
+    },
+    {
+      "area": "Switzerland",
+      "raw_features": [
+        3389.0,
+        4441.0,
+        1316.0,
+        3048.67,
+        -1052.0
+      ],
+      "scaled_features": [
+        -0.275,
+        -0.2444,
+        -0.3362,
+        -0.2852,
+        -0.3702
+      ],
+      "prod_target": 3268.87,
+      "growth_target": 0
+    },
+    {
+      "area": "Syrian Arab Republic",
+      "raw_features": [
+        3846.0,
+        3532.0,
+        3252.72,
+        3543.57,
+        314.0
+      ],
+      "scaled_features": [
+        -0.2623,
+        -0.2706,
+        -0.2788,
+        -0.2709,
+        0.0046
+      ],
+      "prod_target": 3518.0,
+      "growth_target": 0
+    },
+    {
+      "area": "Tajikistan",
+      "raw_features": [
+        4697.0,
+        4565.0,
+        4390.0,
+        4550.67,
+        132.0
+      ],
+      "scaled_features": [
+        -0.2385,
+        -0.2409,
+        -0.2451,
+        -0.2419,
+        -0.0454
+      ],
+      "prod_target": 4882.8,
+      "growth_target": 1
+    },
+    {
+      "area": "Thailand",
+      "raw_features": [
+        11440.85,
+        11153.89,
+        11140.52,
+        11245.09,
+        286.96
+      ],
+      "scaled_features": [
+        -0.0503,
+        -0.0515,
+        -0.045,
+        -0.0491,
+        -0.0028
+      ],
+      "prod_target": 11680.93,
+      "growth_target": 1
+    },
+    {
+      "area": "Timor-Leste",
+      "raw_features": [
+        588.11,
+        586.08,
+        589.1,
+        587.76,
+        2.03
+      ],
+      "scaled_features": [
+        -0.3532,
+        -0.3552,
+        -0.3577,
+        -0.356,
+        -0.081
+      ],
+      "prod_target": 590.13,
+      "growth_target": 1
+    },
+    {
+      "area": "Tonga",
+      "raw_features": [
+        10.78,
+        10.91,
+        11.03,
+        10.91,
+        -0.13
+      ],
+      "scaled_features": [
+        -0.3693,
+        -0.3718,
+        -0.3748,
+        -0.3727,
+        -0.0816
+      ],
+      "prod_target": 10.66,
+      "growth_target": 0
+    },
+    {
+      "area": "Trinidad and Tobago",
+      "raw_features": [
+        145.0,
+        68.0,
+        35.0,
+        82.67,
+        77.0
+      ],
+      "scaled_features": [
+        -0.3656,
+        -0.3701,
+        -0.3741,
+        -0.3706,
+        -0.0604
+      ],
+      "prod_target": 104.0,
+      "growth_target": 0
+    },
+    {
+      "area": "Tunisia",
+      "raw_features": [
+        3650.2,
+        3626.19,
+        3681.18,
+        3652.52,
+        24.01
+      ],
+      "scaled_features": [
+        -0.2677,
+        -0.2679,
+        -0.2661,
+        -0.2678,
+        -0.075
+      ],
+      "prod_target": 3675.08,
+      "growth_target": 1
+    },
+    {
+      "area": "Turkmenistan",
+      "raw_features": [
+        915.27,
+        875.88,
+        873.06,
+        888.07,
+        39.39
+      ],
+      "scaled_features": [
+        -0.3441,
+        -0.3469,
+        -0.3493,
+        -0.3474,
+        -0.0708
+      ],
+      "prod_target": 932.56,
+      "growth_target": 1
+    },
+    {
+      "area": "Tuvalu",
+      "raw_features": [
+        4.84,
+        4.72,
+        4.4,
+        4.65,
+        0.12
+      ],
+      "scaled_features": [
+        -0.3695,
+        -0.372,
+        -0.375,
+        -0.3728,
+        -0.0815
+      ],
+      "prod_target": 4.94,
+      "growth_target": 1
+    },
+    {
+      "area": "T\u00fcrkiye",
+      "raw_features": [
+        114886.43,
+        118297.0,
+        96344.2,
+        109842.54,
+        -3410.57
+      ],
+      "scaled_features": [
+        2.8368,
+        3.0281,
+        2.48,
+        2.7908,
+        -1.0173
+      ],
+      "prod_target": 95492.31,
+      "growth_target": 0
+    },
+    {
+      "area": "USSR",
+      "raw_features": [
+        236000.0,
+        225000.0,
+        240000.0,
+        233666.67,
+        11000.0
+      ],
+      "scaled_features": [
+        6.217,
+        6.095,
+        6.7373,
+        6.3572,
+        2.9363
+      ],
+      "prod_target": 240000.0,
+      "growth_target": 1
+    },
+    {
+      "area": "Uganda",
+      "raw_features": [
+        20875.0,
+        20250.0,
+        19200.0,
+        20108.33,
+        625.0
+      ],
+      "scaled_features": [
+        0.213,
+        0.2099,
+        0.1938,
+        0.2062,
+        0.0899
+      ],
+      "prod_target": 21635.16,
+      "growth_target": 1
+    },
+    {
+      "area": "Ukraine",
+      "raw_features": [
+        57919.0,
+        63079.0,
+        68558.0,
+        63185.33,
+        -5160.0
+      ],
+      "scaled_features": [
+        1.2469,
+        1.441,
+        1.6566,
+        1.4469,
+        -1.4972
+      ],
+      "prod_target": 53490.0,
+      "growth_target": 0
+    },
+    {
+      "area": "United Kingdom of Great Britain and Northern Ireland",
+      "raw_features": [
+        9871.04,
+        9635.1,
+        9416.54,
+        9640.89,
+        235.94
+      ],
+      "scaled_features": [
+        -0.0941,
+        -0.0952,
+        -0.0961,
+        -0.0953,
+        -0.0168
+      ],
+      "prod_target": 10088.99,
+      "growth_target": 1
+    },
+    {
+      "area": "United Republic of Tanzania",
+      "raw_features": [
+        32164.09,
+        31907.15,
+        31760.1,
+        31943.78,
+        256.94
+      ],
+      "scaled_features": [
+        0.5281,
+        0.545,
+        0.566,
+        0.5471,
+        -0.0111
+      ],
+      "prod_target": 31902.46,
+      "growth_target": 0
+    },
+    {
+      "area": "United States of America",
+      "raw_features": [
+        63263.0,
+        56849.0,
+        57490.0,
+        59200.67,
+        6414.0
+      ],
+      "scaled_features": [
+        1.396,
+        1.2619,
+        1.3286,
+        1.3322,
+        1.6781
+      ],
+      "prod_target": 60960.0,
+      "growth_target": 0
+    },
+    {
+      "area": "Uruguay",
+      "raw_features": [
+        10464.0,
+        9024.0,
+        13274.0,
+        10920.67,
+        1440.0
+      ],
+      "scaled_features": [
+        -0.0776,
+        -0.1127,
+        0.0182,
+        -0.0584,
+        0.3135
+      ],
+      "prod_target": 11608.37,
+      "growth_target": 1
+    },
+    {
+      "area": "Uzbekistan",
+      "raw_features": [
+        15835.1,
+        14700.4,
+        14066.9,
+        14867.47,
+        1134.7
+      ],
+      "scaled_features": [
+        0.0723,
+        0.0504,
+        0.0417,
+        0.0552,
+        0.2297
+      ],
+      "prod_target": 16631.6,
+      "growth_target": 1
+    },
+    {
+      "area": "Venezuela (Bolivarian Republic of)",
+      "raw_features": [
+        603.0,
+        671.0,
+        666.0,
+        646.67,
+        -68.0
+      ],
+      "scaled_features": [
+        -0.3528,
+        -0.3528,
+        -0.3554,
+        -0.3544,
+        -0.1002
+      ],
+      "prod_target": 594.51,
+      "growth_target": 0
+    },
+    {
+      "area": "Viet Nam",
+      "raw_features": [
+        24570.78,
+        23772.68,
+        21686.94,
+        23343.47,
+        798.1
+      ],
+      "scaled_features": [
+        0.3162,
+        0.3112,
+        0.2675,
+        0.2994,
+        0.1374
+      ],
+      "prod_target": 25462.68,
+      "growth_target": 1
+    },
+    {
+      "area": "Western Africa",
+      "raw_features": [
+        7851.2,
+        7403.87,
+        7484.8,
+        7579.96,
+        447.33
+      ],
+      "scaled_features": [
+        -0.1505,
+        -0.1593,
+        -0.1534,
+        -0.1547,
+        0.0412
+      ],
+      "prod_target": 9891.13,
+      "growth_target": 1
+    },
+    {
+      "area": "Yemen",
+      "raw_features": [
+        2957.0,
+        2955.0,
+        2885.89,
+        2932.63,
+        2.0
+      ],
+      "scaled_features": [
+        -0.2871,
+        -0.2872,
+        -0.2897,
+        -0.2885,
+        -0.081
+      ],
+      "prod_target": 2959.27,
+      "growth_target": 1
+    },
+    {
+      "area": "Yugoslav SFR",
+      "raw_features": [
+        5284.0,
+        4619.0,
+        4778.0,
+        4893.67,
+        665.0
+      ],
+      "scaled_features": [
+        -0.2221,
+        -0.2393,
+        -0.2336,
+        -0.232,
+        0.1009
+      ],
+      "prod_target": 5741.0,
+      "growth_target": 1
+    },
+    {
+      "area": "Zambia",
+      "raw_features": [
+        867.07,
+        851.6,
+        838.48,
+        852.38,
+        15.47
+      ],
+      "scaled_features": [
+        -0.3454,
+        -0.3476,
+        -0.3503,
+        -0.3484,
+        -0.0773
+      ],
+      "prod_target": 881.47,
+      "growth_target": 1
+    }
+  ],
+  "hive_screening_rules": {
+    "optimal_temperature_c": {
+      "min": 33.0,
+      "max": 36.0
+    },
+    "critical_temperature_c": {
+      "low": 28.0,
+      "high": 40.0
+    },
+    "optimal_humidity_pct": {
+      "min": 50.0,
+      "max": 65.0
+    },
+    "critical_humidity_pct": {
+      "high": 75.0
+    },
+    "inspection_alerts": {
+      "temp_cold": "Temperature below 32\u00b0C: Risk of brood chilling and slowed wax secretion. Check hive insulation.",
+      "temp_hot": "Temperature above 36.5\u00b0C: Risk of overheating and honey softening. Ensure hive ventilation and shaded cover.",
+      "humidity_high": "Humidity exceeds 68%: Moisture buildup creates high susceptibility to chalkbrood and nosema.",
+      "pests_varroa": "Varroa destructor suspected: Implement immediate non-chemical screening or oxalic acid vapor according to seasonal threshold."
+    }
+  }
+}

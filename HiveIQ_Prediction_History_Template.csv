@@ -1,0 +1,1 @@
+prediction_id,created_at,model_name,model_version,hive_id_or_area,input_features_json,predicted_value,predicted_class,actual_value,evaluation_status,notes

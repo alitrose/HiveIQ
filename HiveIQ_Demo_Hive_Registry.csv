@@ -1,0 +1,6 @@
+hive_id,apiary_name,location,installation_date,hive_type,status,data_type
+HIVE-001,Demo Apiary A,Coimbatore,2025-01-15,Langstroth,Active,SIMULATED_DEMO
+HIVE-002,Demo Apiary A,Coimbatore,2025-02-10,Langstroth,Active,SIMULATED_DEMO
+HIVE-003,Demo Apiary B,Palakkad,2025-03-05,Top-bar,Needs Inspection,SIMULATED_DEMO
+HIVE-004,Demo Apiary B,Palakkad,2025-04-20,Langstroth,Active,SIMULATED_DEMO
+HIVE-005,Demo Apiary C,Thrissur,2025-05-12,Top-bar,Active,SIMULATED_DEMO
