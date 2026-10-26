@@ -1,7 +1,7 @@
 # HiveIQ: Smart Honey Hive Tracking & Production Analytics
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/YOUR_GITHUB_USERNAME/HiveIQ/blob/main/HiveIQ_Course_Project_Colab.ipynb)
-[![GitHub Pages](https://img.shields.io/badge/Live%20Demo-GitHub%20Pages-success?style=flat&logo=github)](https://YOUR_GITHUB_USERNAME.github.io/HiveIQ/)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/alitrose/HiveIQ/blob/main/HiveIQ_Course_Project_Colab.ipynb)
+[![GitHub Pages](https://img.shields.io/badge/Live%20Demo-GitHub%20Pages-success?style=flat&logo=github)](https://alitrose.github.io/HiveIQ/)
 [![Course](https://img.shields.io/badge/Course-23CS2024%20Data%20Science%20Ecosystem-amber)](https://github.com)
 [![Status](https://img.shields.io/badge/Status-Complete%20%26%20Tested-brightgreen)](https://github.com)
 
@@ -11,9 +11,9 @@
 
 ## 🍯 Live Application & Quick Links
 
-- **Live Web Application (GitHub Pages):** [https://YOUR_GITHUB_USERNAME.github.io/HiveIQ/](https://YOUR_GITHUB_USERNAME.github.io/HiveIQ/)  
-  *(Replace `YOUR_GITHUB_USERNAME` with your GitHub handle)*
-- **Interactive Google Colab Notebook:** [Open in Google Colab](https://colab.research.google.com/github/YOUR_GITHUB_USERNAME/HiveIQ/blob/main/HiveIQ_Course_Project_Colab.ipynb)
+- **Live Web Application (GitHub Pages):** [https://alitrose.github.io/HiveIQ/](https://alitrose.github.io/HiveIQ/)  
+  *(Replace `alitrose` with your GitHub handle)*
+- **Interactive Google Colab Notebook:** [Open in Google Colab](https://colab.research.google.com/github/alitrose/HiveIQ/blob/main/HiveIQ_Course_Project_Colab.ipynb)
 - **Local Standalone Run:** Download this repository and double-click `index.html` (zero dependencies, works 100% offline).
 
 ---
@@ -127,7 +127,7 @@ No Node.js, Python server, or build tools are required:
 
 1. Clone or download this repository:
    ```bash
-   git clone https://github.com/YOUR_GITHUB_USERNAME/HiveIQ.git
+   git clone https://github.com/alitrose/HiveIQ.git
    cd HiveIQ
    ```
 2. Double-click `index.html` to open it in any modern browser (Chrome, Edge, Firefox, Brave, Safari).
@@ -144,12 +144,12 @@ No Node.js, Python server, or build tools are required:
    git add .
    git commit -m "Initial commit of HiveIQ course project"
    git branch -M main
-   git remote add origin https://github.com/YOUR_GITHUB_USERNAME/HiveIQ.git
+   git remote add origin https://github.com/alitrose/HiveIQ.git
    git push -u origin main
    ```
 3. On GitHub, navigate to **Settings** $\rightarrow$ **Pages** (on the left menu).
 4. Under **Branch**, select `main` and folder `/ (root)`, then click **Save**.
-5. Your web application will be live at `https://YOUR_GITHUB_USERNAME.github.io/HiveIQ/` in 1–2 minutes!
+5. Your web application will be live at `https://alitrose.github.io/HiveIQ/` in 1–2 minutes!
 
 ---
 
